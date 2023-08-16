@@ -74,6 +74,17 @@ void loop() {
   Serial.println(bmp.readTemperature());
   Serial.println("*C");
 
+  float temp = bmp.readTemperature();
+  String temp_send = "Temp - " + String(temp);
+  
+  int temp_len = temp_send.length(); temp_len++;
+  unit8_t total[temp_len];
+  temp_send.toCharArray(total, temp_len);
+  
+  LoRa.beginPacket();
+  LoRa.print(temp_send);
+  LoRa.endPacket(true);
+
   Serial.println("Pressure = ");
   Serial.println(bmp.readPressure()/100);
   Serial.println("hPa");
@@ -136,4 +147,13 @@ void testServos(){
     servo2.write(pos);
     delay(15);
   }
+}
+
+char* charArray(float data){
+  String data_send = "Temp - " + String(temp);
+  
+  int data_len = data_send.length(); data_len++;
+  unit8_t total[data_len];
+  return data_send.toCharArray(total, data_len);
+
 }
