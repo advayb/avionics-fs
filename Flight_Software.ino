@@ -17,8 +17,8 @@ Servo servo1;
 Servo servo2;
 int pos = 0;
 //pyro
-const int pyro1 = 11;
-const int pyro2 = 12;
+// const int pyro1 = 11;
+// const int pyro2 = 12;
 
 
 MPU9250 mpu;
@@ -84,15 +84,21 @@ void loop() {
   //sd test
 
   if(millis() < sd_t){
-  Serial.println("SD Card Test start");
+  Serial.println("SD Card initialisation start");
   File dataFile = SD.open("data.txt", FILE_WRITE);
   if(dataFile){
     dataFile.println("SD card works!");
     dataFile.close();
-    Serial.println("Data written to SD Card");
+    String message = "Data written to SD Card";
+    LoRa.beginPacket();
+    LoRa.print(message);
+    LoRa.endPacket(true);
   }
   else{
-    Serial.println("Error opening SD card");
+    String message = "Error writing to SD Card";
+    LoRa.beginPacket();
+    LoRa.print(message);
+    LoRa.endPacket(true);
   }
   delay(2000);
   }
@@ -100,38 +106,48 @@ void loop() {
 
   //bmp test
   if(millis() < bmp_t && millis() > sd_t){
+  Serial.println("BMP initialisation start")
+  float temp = bmp.readTemperature();
+  float press = bmp.readPressure()/100;
+  float alt = bmp.readAltitude(1019.66);
+  
   Serial.println("BMP280 Test start");
   Serial.println("Temperature = ");
-  Serial.println(bmp.readTemperature());
+  Serial.println(temp);
   Serial.println("*C");
 
-  float temp = bmp.readTemperature();
-  String temp_send = "Temp - " + String(temp);
-  
-  int temp_len = temp_send.length(); temp_len++;
-  unit8_t total[temp_len];
-  temp_send.toCharArray(total, temp_len);
-  
-  LoRa.beginPacket();
-  LoRa.print(temp_send);
-  LoRa.endPacket(true);
-
   Serial.println("Pressure = ");
-  Serial.println(bmp.readPressure()/100);
+  Serial.println(press);
   Serial.println("hPa");
 
   Serial.println("Approx altitude = ");
-  Serial.println(bmp.readAltitude(1019.66));
+  Serial.println(alt);
   Serial.println(" m");
 
-  Serial.println();
+  File dataFile = SD.open("data.txt", FILE_WRITE);
+  if (dataFile){
+    String data = "Temp - " + String(temp);
+    dataFile.println(data);
+    String data = "Pressure - " + String(press);
+    dataFile.println(data);
+    String data = "Alt - " + String(alt);
+    dataFile.println(data);
+    dataFile.close();
+  }
+
+
+  LoRa.beginPacket();
+  String message = "Temp - " + String(temp) + " Pressure - " + String(press) + " Alt - " + String(alt);
+  LoRa.print(message);
+  LoRa.endPacket(true);
+
   delay(50);
 
   }
   //servo test
 
   if(millis() < servo_t && millis() > sd_t){
-  Serial.println("Servo Test start");
+  Serial.println("Servo initialisation start");
   testServos();
   delay(2000);
 
@@ -157,12 +173,32 @@ void loop() {
         k_angleY = kalman1D[0];
         kU_angleY = kalman1D[1];
 
+
+
         Serial.print("roll, pitch, yaw: ");
         Serial.print(k_angleR, 4);
         Serial.print(", ");
         Serial.print(k_angleP, 4);
         Serial.print(", ");
         Serial.println(k_angleY, 4);
+
+        File dataFile = SD.open("data.txt", FILE_WRITE);
+        if (dataFile){
+          String data = "Roll - " + String(k_angleR);
+          dataFile.println(data);
+          String data = " Pitch - " + String(k_angleP);
+          dataFile.println(data);
+          String data = " Yaw - " + String(k_angleY);
+          dataFile.println(data);
+          dataFile.close();
+        }
+
+        LoRa.beginPacket();
+        String message = "Roll - " + String(k_angleR) + " Pitch - " + String(k_angleP) + " Yaw - " + String(k_angleY);
+        LoRa.print(message);
+        LoRa.endPacket(true);
+
+
 
         /* if magnetic field values are needed
         Serial.print("Magnetic field in x,y,z: ");
@@ -179,25 +215,6 @@ void loop() {
     }
   }
   delay(5000);
-
-  while (LoRa.beginPacket() == 0) {
-    Serial.print("waiting for radio ... ");
-    delay(100);
-  }
-
-  Serial.print("Sending packet non-blocking: ");
-  Serial.println(counter);
-
-  // send in async / non-blocking mode
-  LoRa.beginPacket();
-  LoRa.print("hello ");
-  LoRa.print(counter);
-  LoRa.endPacket(true); // true = async / non-blocking mode
-
-  counter++;
-
-  testServos();
-
 }
 
 void testServos(){
@@ -213,14 +230,15 @@ void testServos(){
   }
 }
 
-char* charArray(float data) {
-  String data_send = "Temp - " + String(data);
+// char* charArray(float data) {
+//   String data_send = "Temp - " + String(data);
   
-  int data_len = data_send.length() + 1;
-  uint8_t total[data_len];
-  data_send.toCharArray((char*)total, data_len);
-  return (char*)total;
-}
+//   int data_len = data_send.length() + 1;
+//   uint8_t total[data_len];
+//   data_send.toCharArray((char*)total, data_len);
+//   return (char*)total;
+// }
+
 void signals(){
   rollR = mpu.getGyroX();
   pitchR = mpu.getGyroY();
