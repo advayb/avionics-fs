@@ -11,21 +11,26 @@
 Adafruit_BMP280 bmp;
 
 int counter = 0;
-
+//servo
 const int servoPin1 = 9;
 const int servoPin2 = 10;
 Servo servo1;
 Servo servo2;
 int pos = 0;
-
+//pyro
 const int pyro1 = 11;
 const int pyro2 = 12;
 
 void setup() {
   // put your setup code here, to run once:
+  if (!LoRa.begin(915E6)) {
+    Serial.println("Starting LoRa failed!");
+    while (1);
+  }
+
   delay(2000);
   Serial.begin(9600);
-  Serial.println("flight software test");
+  Serial.println("Flight software initialisation");
 
   // if(!SD.begin(BUILTIN_SDCARD)){
   //   Serial.println("SD card initialisation failed!");
@@ -35,8 +40,7 @@ void setup() {
     LoRa.write("Cannot find BMP280 sensor - check wiring!");
     while(1);
   }
-  
-  /*default settings from datasheet*/
+
   bmp.setSampling(Adafruit_BMP280::MODE_NORMAL, Adafruit_BMP280::SAMPLING_X2, Adafruit_BMP280::SAMPLING_X16, Adafruit_BMP280::FILTER_X16, Adafruit_BMP280::STANDBY_MS_500);
  
   /*Servo setup*/
@@ -44,14 +48,11 @@ void setup() {
   servo2.attach(servoPin2);
   testServos();
 
-  while (!Serial);
-
-  Serial.println("LoRa Sender non-blocking");
-
   if (!LoRa.begin(915E6)) {
     Serial.println("Starting LoRa failed!");
     while (1);
   }
+  
 }
 
 void loop() {
