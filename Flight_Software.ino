@@ -42,15 +42,10 @@ void setup() {
 
   delay(2000);
   Serial.begin(9600);
-<<<<<<< Updated upstream
-  Serial.println("Flight software initialisation");
-=======
 
   Wire.setClock(400000);
   Wire.begin();
-
-  Serial.println("flight software test");
->>>>>>> Stashed changes
+  Serial.println("flight software initialisation");
 
   // if(!SD.begin(BUILTIN_SDCARD)){
   //   Serial.println("SD card initialisation failed!");
@@ -72,9 +67,7 @@ void setup() {
     Serial.println("Starting LoRa failed!");
     while (1);
   }
-<<<<<<< Updated upstream
   
-=======
 
   if (!mpu.setup(0x68)) {  // change to your own address
         while (1) {
@@ -82,7 +75,6 @@ void setup() {
             delay(1000);
         }
     }
->>>>>>> Stashed changes
 }
 
 void loop() {
@@ -142,13 +134,8 @@ void loop() {
   Serial.println("Servo Test start");
   testServos();
   delay(2000);
-<<<<<<< Updated upstream
-  
-  Serial.println("MPU 9250 Test starts");
-=======
 
   }
->>>>>>> Stashed changes
   
   //mpu test
   if(millis() < mpu_t && millis() > servo_t){
@@ -226,7 +213,6 @@ void testServos(){
   }
 }
 
-<<<<<<< Updated upstream
 char* charArray(float data) {
   String data_send = "Temp - " + String(data);
   
@@ -235,7 +221,6 @@ char* charArray(float data) {
   data_send.toCharArray((char*)total, data_len);
   return (char*)total;
 }
-=======
 void signals(){
   rollR = mpu.getGyroX();
   pitchR = mpu.getGyroY();
@@ -260,4 +245,3 @@ void kalman(float kState, float kU, float kInput, float kM){
   kalman1D[0] = kState;
   kalman1D[1] = kU;
 }
->>>>>>> Stashed changes
