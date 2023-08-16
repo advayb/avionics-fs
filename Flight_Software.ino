@@ -5,7 +5,6 @@
 #include <Servo.h>
 #include <SD.h>
 #include <LoRa.h>
-#include <RH_RF95.h>
 
 #define BMP280_ADDRESS 0x76
 Adafruit_BMP280 bmp;
@@ -46,7 +45,7 @@ void setup() {
   /*Servo setup*/
   servo1.attach(servoPin1);
   servo2.attach(servoPin2);
-  testServos();
+  
 
   if (!LoRa.begin(915E6)) {
     Serial.println("Starting LoRa failed!");
@@ -135,6 +134,8 @@ void loop() {
 
   counter++;
 
+  testServos();
+  
 }
 
 void testServos(){
