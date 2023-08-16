@@ -99,19 +99,6 @@ void loop() {
   Serial.println("Servo Test start");
   testServos();
   delay(2000);
-
-  Serial.println("Testing pyro channels");
-  Serial.println("Pyro 1 high");
-  digitalWrite(pyro1, HIGH);
-  delay(2000);
-  Serial.println("Pyro 1 low");
-  digitalWrite(pyro1, LOW);
-  delay(2000);
-  Serial.println("Pyro 2 high");
-  digitalWrite(pyro2, HIGH);
-  delay(2000);
-  Serial.println("Pyro 2 low");
-  digitalWrite(pyro2, LOW);
   
   Serial.println("MPU 9250 Test starts");
   
@@ -135,7 +122,7 @@ void loop() {
   counter++;
 
   testServos();
-  
+
 }
 
 void testServos(){
