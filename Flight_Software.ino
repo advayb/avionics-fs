@@ -151,11 +151,11 @@ void testServos(){
   }
 }
 
-char* charArray(float data){
-  String data_send = "Temp - " + String(temp);
+char* charArray(float data) {
+  String data_send = "Temp - " + String(data);
   
-  int data_len = data_send.length(); data_len++;
-  unit8_t total[data_len];
-  return data_send.toCharArray(total, data_len);
-
+  int data_len = data_send.length() + 1;
+  uint8_t total[data_len];
+  data_send.toCharArray((char*)total, data_len);
+  return (char*)total;
 }
