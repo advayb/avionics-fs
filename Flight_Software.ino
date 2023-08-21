@@ -28,9 +28,9 @@ float rollR, pitchR, yawR; //rates of change of roll blah blah in rad/s
 float accX, accY, accZ; //acceleration in axes
 float angleR, angleP, angleY; //angles of roll pitch blah
 
-float k_angleR, k_angleP, k_angleY; //kalman angles
-float kU_angleR = 4, kU_angleP = 4, kU_angleY = 4; //kalman uncertainties, assumed to be 4 in the start
-float kalman1D[2] = {0,0}; //array to store kalman angle and uncertainty for each roll, pitch and yaw
+// float k_angleR, k_angleP, k_angleY; //kalman angles
+// float kU_angleR = 4, kU_angleP = 4, kU_angleY = 4; //kalman uncertainties, assumed to be 4 in the start
+// float kalman1D[2] = {0,0}; //array to store kalman angle and uncertainty for each roll, pitch and yaw
 
 
 void setup() {
@@ -68,7 +68,7 @@ void setup() {
     while (1);
   }
   
-
+  mpu.selectFilter(QuatFilterSel::MAHONY);
   if (!mpu.setup(0x68)) {  // change to your own address
         while (1) {
             Serial.println("MPU connection failed");
@@ -159,42 +159,45 @@ void loop() {
   if (mpu.update()) {
       prev_ms = millis();
       if (millis() > prev_ms + 25) {
-        signals();
-
-        kalman(k_angleR, kU_angleR, rollR, angleR); //to get smoother and more accurate roll. same below for pitch and yaw
-        k_angleR = kalman1D[0];
-        kU_angleR = kalman1D[1];
-
-        kalman(k_angleP, kU_angleP, pitchR, angleP);
-        k_angleP = kalman1D[0];
-        kU_angleP = kalman1D[1];
-
-        kalman(k_angleY, kU_angleY, yawR, angleY);
-        k_angleY = kalman1D[0];
-        kU_angleY = kalman1D[1];
-
-
-
-        Serial.print("roll, pitch, yaw: ");
-        Serial.print(k_angleR, 4);
+        angles();
+        Serial.print("Roll, pitch, yaw: ");
+        Serial.print(angleR, 4);
         Serial.print(", ");
-        Serial.print(k_angleP, 4);
+        Serial.print(angleP, 4);
         Serial.print(", ");
-        Serial.println(k_angleY, 4);
+        Serial.println(angleY, 4);
+        // kalman(k_angleR, kU_angleR, rollR, angleR); //to get smoother and more accurate roll. same below for pitch and yaw
+        // k_angleR = kalman1D[0];
+        // kU_angleR = kalman1D[1];
+
+        // kalman(k_angleP, kU_angleP, pitchR, angleP);
+        // k_angleP = kalman1D[0];
+        // kU_angleP = kalman1D[1];
+
+        // kalman(k_angleY, kU_angleY, yawR, angleY);
+        // k_angleY = kalman1D[0];
+        // kU_angleY = kalman1D[1];
+
+        // Serial.print("roll, pitch, yaw: ");
+        // Serial.print(k_angleR, 4);
+        // Serial.print(", ");
+        // Serial.print(k_angleP, 4);
+        // Serial.print(", ");
+        // Serial.println(k_angleY, 4);
 
         File dataFile = SD.open("data.txt", FILE_WRITE);
         if (dataFile){
-          String data = "Roll - " + String(k_angleR);
+          String data = "Roll - " + String(angleR);
           dataFile.println(data);
-          String data = " Pitch - " + String(k_angleP);
+          String data = " Pitch - " + String(angleP);
           dataFile.println(data);
-          String data = " Yaw - " + String(k_angleY);
+          String data = " Yaw - " + String(angleY);
           dataFile.println(data);
           dataFile.close();
         }
 
         LoRa.beginPacket();
-        String message = "Roll - " + String(k_angleR) + " Pitch - " + String(k_angleP) + " Yaw - " + String(k_angleY);
+        String message = "Roll - " + String(angleR) + " Pitch - " + String(angleP) + " Yaw - " + String(angleY);
         LoRa.print(message);
         LoRa.endPacket(true);
 
@@ -239,27 +242,31 @@ void testServos(){
 //   return (char*)total;
 // }
 
-void signals(){
-  rollR = mpu.getGyroX();
-  pitchR = mpu.getGyroY();
-  yawR = mpu.getGyroZ();
+void angles(){
 
-  accX = mpu.getAccX();
-  accY = mpu.getAccY();
-  accZ = mpu.getAccZ();
+  angleR = mpu.getRoll();
+  angleP = mpu.getPitch();
+  angleY = mpu.getYaw();
+  // rollR = mpu.getGyroX();
+  // pitchR = mpu.getGyroY();
+  // yawR = mpu.getGyroZ();
 
-  angleR = 180*atan(accY/sqrt(accX*accX+accZ*accZ))/(3.14159);
-  angleP = -180*atan(accX/sqrt(accY*accY+accZ*accZ))/(3.14159);
-  angleY = 180*atan(accZ/sqrt(accX*accX+accZ*accZ))/(3.14159);
+  // accX = mpu.getAccX();
+  // accY = mpu.getAccY();
+  // accZ = mpu.getAccZ();
+
+  // angleR = 180*atan(accY/sqrt(accX*accX+accZ*accZ))/(3.14159);
+  // angleP = -180*atan(accX/sqrt(accY*accY+accZ*accZ))/(3.14159);
+  // angleY = 180*atan(accZ/sqrt(accX*accX+accZ*accZ))/(3.14159);
 }
 
-void kalman(float kState, float kU, float kInput, float kM){
-  kState = kState + 0.004*kInput;
-  kU = kU + 0.004*0.004*4*4;
-  float kGain = kU/(kU + 3*3);
-  kState = kState + kGain*(kM - kState);
-  kU = (1 - kGain)*kU;
+// void kalman(float kState, float kU, float kInput, float kM){
+//   kState = kState + 0.004*kInput;
+//   kU = kU + 0.004*0.004*4*4;
+//   float kGain = kU/(kU + 3*3);
+//   kState = kState + kGain*(kM - kState);
+//   kU = (1 - kGain)*kU;
 
-  kalman1D[0] = kState;
-  kalman1D[1] = kU;
-}
+//   kalman1D[0] = kState;
+//   kalman1D[1] = kU;
+// }
