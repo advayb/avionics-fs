@@ -45,14 +45,14 @@ void setup() {
 
   Wire.setClock(400000);
   Wire.begin();
-  Serial.println("flight software initialisation");
+  Serial.println("flight software initialisation"); 
 
   // if(!SD.begin(BUILTIN_SDCARD)){
   //   Serial.println("SD card initialisation failed!");
   // }
 
   if(!bmp.begin(BMP280_ADDRESS)){
-    LoRa.write("Cannot find BMP280 sensor - check wiring!");
+    LoRa.write("Cannot find BMP280 sensor - check wiring!"); // correct this later, add lora to all status updates
     while(1);
   }
 
