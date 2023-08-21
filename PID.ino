@@ -8,32 +8,32 @@ double kd = 0.2;
 
 double setpoint = 0.0; // Desired trajectory value
 double input_x = 0.0;
-double input_y = 0.0;
+double input_z = 0.0;
 
 void loop()
 {
     double angle_x = readAngleX;
-    double angle_y = readAngleY;
+    double angle_z = readAngleZ;
 
     input_x = angle_x;
-    input_y = angle_y;
+    input_z = angle_z;
 
     myPID_x.Compute();
-    myPID_y.Compute();
+    myPID_z.Compute();
 
     adjustServoX(output_x);
-    adjustServoY(output_y);
+    adjustServoZ(output_z);
 
     delay(10);
 }
 PID myPID_x(&input_x, &output_x, &setpoint, kp, ki, kd, DIRECT);
-PID myPID_y(&input_y, &output_y, &setpoint, kp, ki, kd, DIRECT);
+PID myPID_z(&input_z, &output_z, &setpoint, kp, ki, kd, DIRECT);
 
 void adjustServoX(double control_x){
-    double servoAngle = map(control_x, -255, 255, 0, 180);
+    // double servoAngle = map(control_x, -255, 255, 0, 180);
     servoX.write(servoAngle);
 }
-void adjustServoY(double control_y){
-    double servoAngle = map(control_y, -255, 255, 0, 180);
-    servoX.write(servoAngle);
+void adjustServoY(double control_z){
+    // double servoAngle = map(control_z, -255, 255, 0, 180);
+    servoZ.write(servoAngle);
 }
