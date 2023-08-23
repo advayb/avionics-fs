@@ -20,6 +20,20 @@ int pos = 0;
 // const int pyro1 = 11;
 // const int pyro2 = 12;
 
+const int numReadings = 10; // Number of readings to average
+const float processNoise_bmp = 0.01; // Process noise covariance
+const float measurementNoise_bmp = 1.0; // Measurement noise covariance
+
+// Variables for Kalman filter
+float x_pred = 0; // Predicted state
+float P_pred = 1; // Predicted covariance
+float K; // Kalman gain
+float x_est = 0; // Estimated state
+
+float readings[numReadings]; // Array to store readings for averaging
+int readIndex = 0; // Index to keep track of the current reading
+float total = 0; // Running total of readings for averaging
+
 
 MPU9250 mpu;
 int t_rate; //transmission rate of data from serial
@@ -58,6 +72,11 @@ void setup() {
 
   bmp.setSampling(Adafruit_BMP280::MODE_NORMAL, Adafruit_BMP280::SAMPLING_X2, Adafruit_BMP280::SAMPLING_X16, Adafruit_BMP280::FILTER_X16, Adafruit_BMP280::STANDBY_MS_500);
  
+  for (int i = 0; i < numReadings; i++) {//initialize array
+    total + = bmp.readAltitude();
+    readings[i] = bmp.readAltitude();
+  }
+
   /*Servo setup*/
   servo1.attach(servoPin1);
   servo2.attach(servoPin2);
@@ -109,8 +128,23 @@ void loop() {
   Serial.println("BMP initialisation start")
   float temp = bmp.readTemperature();
   float press = bmp.readPressure()/100;
-  float alt = bmp.readAltitude(1019.66);
   
+  float rawValue = bmp.readAltitide();
+  total = total + rawValue - readings[readIndex];
+  readings[++readIndex] = rawValue;
+  readIndex = readIndex % numReadings;
+
+  // Calculate the average reading
+  float averageValue = total / numReadings;
+
+  // Kalman filter
+  x_pred = x_est;
+  P_pred = P_pred + processNoise;
+
+  K = P_pred / (P_pred + measurementNoise);
+  x_est = x_pred + K * (averageValue - x_pred);
+  P_pred = (1 - K) * P_pred;
+
   Serial.println("BMP280 Test start");
   Serial.println("Temperature = ");
   Serial.println(temp);
@@ -121,7 +155,7 @@ void loop() {
   Serial.println("hPa");
 
   Serial.println("Approx altitude = ");
-  Serial.println(alt);
+  Serial.println(x_est);
   Serial.println(" m");
 
   File dataFile = SD.open("data.txt", FILE_WRITE);
@@ -130,14 +164,14 @@ void loop() {
     dataFile.println(data);
     String data = "Pressure - " + String(press);
     dataFile.println(data);
-    String data = "Alt - " + String(alt);
+    String data = "Alt - " + String(x_est);
     dataFile.println(data);
     dataFile.close();
   }
 
 
   LoRa.beginPacket();
-  String message = "Temp - " + String(temp) + " Pressure - " + String(press) + " Alt - " + String(alt);
+  String message = "Temp - " + String(temp) + " Pressure - " + String(press) + " Alt - " + String(x_est);
   LoRa.print(message);
   LoRa.endPacket(true);
 
@@ -259,14 +293,3 @@ void angles(){
   // angleP = -180*atan(accX/sqrt(accY*accY+accZ*accZ))/(3.14159);
   // angleY = 180*atan(accZ/sqrt(accX*accX+accZ*accZ))/(3.14159);
 }
-
-// void kalman(float kState, float kU, float kInput, float kM){
-//   kState = kState + 0.004*kInput;
-//   kU = kU + 0.004*0.004*4*4;
-//   float kGain = kU/(kU + 3*3);
-//   kState = kState + kGain*(kM - kState);
-//   kU = (1 - kGain)*kU;
-
-//   kalman1D[0] = kState;
-//   kalman1D[1] = kU;
-// }
