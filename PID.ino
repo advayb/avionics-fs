@@ -18,6 +18,10 @@ Servo servoZ;
 void setup() {
     servoX.attach(/*X servo pin*/);
     servoZ.attach(/*Z servo pin*/);
+
+    // Set PID modes and tuning parameters
+    myPID_x.SetMode(AUTOMATIC);
+    myPID_z.SetMode(AUTOMATIC);
 }
 
 PID myPID_x(&input_x, &output_x, &setpoint, kp, ki, kd, DIRECT);
