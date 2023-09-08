@@ -15,7 +15,7 @@
 
 #include <MPU6500_WE.h>
 #include <Wire.h>
-#include "Kalman.h"
+#include <Kalman.h>
 #define MPU6500_ADDR 0x68
 
 xyzFloat gValue;
@@ -230,8 +230,8 @@ void loop() {
   gyroYangle += gyroYrate * dt;
   //gyroXangle += kalmanX.getRate() * dt; // Calculate gyro angle using the unbiased rate
   //gyroYangle += kalmanY.getRate() * dt;
-  compAngleX = 0.9 * (compAngleX + gyroXrate * dt) + 0.1 * roll; // Calculate the angle using a Complimentary filter
-  compAngleY = 0.9 * (compAngleY + gyroYrate * dt) + 0.1 * pitch;
+  compAngleX = 0.7 * (compAngleX + gyroXrate * dt) + 0.3 * roll; // Calculate the angle using a Complimentary filter
+  compAngleY = 0.7 * (compAngleY + gyroYrate * dt) + 0.3 * pitch;
   // Reset the gyro angle when it has drifted too much
   if (gyroXangle < -180 || gyroXangle > 180)
     gyroXangle = kalAngleX;
@@ -240,8 +240,12 @@ void loop() {
   // Serial.print(accX); Serial.print(":");
   // Serial.print(accY); Serial.print(":");
   // Serial.print(accZ); Serial.print(":");
-  Serial.print(roll); Serial.print(" ");
-  Serial.print(pitch); Serial.print(" \n");
+  // Serial.print(roll); Serial.print(" ");
+  Serial.println("kalman pitch");
+  Serial.println(kalAngleY); 
+  Serial.println("sensor pitch");
+  Serial.println(myMPU6500.getPitch());
+
   // Serial.print(gyroXangle); Serial.print(":");
   // Serial.print(gyroYangle); Serial.print(":");
   // Serial.print(compAngleX); Serial.print(":");
@@ -250,9 +254,9 @@ void loop() {
   // Serial.println(kalAngleY);// Serial.print("\t");
   //Serial.print("\r\n");
 
-  printData(gValue, gyr, angle, pitch, roll, resultantG, temp, kalAngleX, kalAngleY);
+  // printData(gValue, gyr, angle, pitch, roll, resultantG, temp, kalAngleX, kalAngleY);
 
-  delay(200);
+  delay(20);
 
 
 
