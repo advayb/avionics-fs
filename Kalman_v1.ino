@@ -8,7 +8,14 @@ VectorXd x(9); // State vector (position, velocity, acceleration)
 MatrixXd A(9, 9); // State transition matrix
 A << 1, 0, 0, dt, 0, 0, 0.5*dt*dt, 0, 0,
      0, 1, 0, 0, dt, 0, 0, 0.5*dt*dt, 0,
-     0, 0, 1, 0, 0, dt, 0, 0, 0.5*dt*dt;
+     0, 0, 1, 0, 0, dt, 0, 0, 0.5*dt*dt,
+     0, 0, 0, 1, 0, 0, dt, 0, 0,
+     0, 0, 0, 0, 1, 0, 0, dt, 0,
+     0, 0, 0, 0, 0, 1, 0, 0, dt,
+     0, 0, 0, 0, 0, 0, 1, 0, 0,
+     0, 0, 0, 0, 0, 0, 0, 1, 0,
+     0, 0, 0, 0, 0, 0, 0, 0, 1;
+
 MatrixXd P(9, 9); // State covariance matrix
 MatrixXd Q(9, 9); // Process noise covariance matrix
 MatrixXd H(3, 9); // Measurement matrix
