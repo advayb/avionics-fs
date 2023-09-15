@@ -39,49 +39,50 @@ Matrix<3,9> H = {0,0,1,0,0,0,0,0,0,
                 0,0,0,0,0,0,1,0,0,
                 0,0,0,0,0,0,0,1,0,
                 0,0,0,0,0,0,0,0,1}// Measurement matrix
-Matrix<3,3> = {1,0,0,
+Matrix<3,3> R= {1,0,0,
                0,1,0
                0,0,1} // Measurement noise covariance matrix
 void setup() {
   // Initialize the Kalman filter parameters
-  initKalmanFilter();
+  // initKalmanFilter();
   
   Serial.begin(9600);
+  Serial.print(A\nB)
 }
 void loop() {
   // Simulate sensor measurements (replace with actual sensor readings)
-  VectorXd z(3); // Simulated 3D position measurement
+  // VectorXd z(3); // Simulated 3D position measurement
   // Fill z with actual measurements here
   
   // Prediction step
-  predict();
+  // predict();
   
   // Update step
-  update(z);
+  // update(z);
   
   // Output the estimated state (position, velocity, acceleration)
-  Serial.print("Estimated State (x): ");
-  for (int i = 0; i < x.size(); i++) {
-    Serial.print(x(i));
-    Serial.print("\t");
-  }
-  Serial.println();
+  // Serial.print("Estimated State (x): ");
+  // for (int i = 0; i < x.size(); i++) {
+  //   Serial.print(x(i));
+  //   Serial.print("\t");
+  // }
+  // Serial.println();
   
-  delay(100);
+  // delay(100);
 }
-void initKalmanFilter() {
-  // Initialize state vector, A, P, Q, H, R, and other parameters as needed
-}
-void predict() {
-  // Predict the next state (x) and covariance (P) here
-}
-void update(const VectorXd& z) {
-  // Update the state (x) and covariance (P) based on measurement (z) here
-}
-int main() {
-  setup();
-  while (true) {
-    loop();
-  }
-  return 0;
-}
+// void initKalmanFilter() {
+//   // Initialize state vector, A, P, Q, H, R, and other parameters as needed
+// }
+// void predict() {
+//   // Predict the next state (x) and covariance (P) here
+// }
+// void update(const VectorXd& z) {
+//   // Update the state (x) and covariance (P) based on measurement (z) here
+// }
+// int main() {
+//   setup();
+//   while (true) {
+//     loop();
+//   }
+//   return 0;
+// }
