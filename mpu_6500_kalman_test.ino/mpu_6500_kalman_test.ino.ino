@@ -203,7 +203,12 @@ void loop() {
   accX = gValue.x;
   accY = gValue.y;
   accZ = gValue.z;
-  
+
+  Serial.println("Acceleration");
+  Serial.println(accX);
+  Serial.println(accY);
+  Serial.println(accZ);
+
   //gyr is in deg/s while we want gyro in rad/s
   gyroX = gyr.x;
   gyroY = gyr.y;
@@ -241,10 +246,10 @@ void loop() {
   // Serial.print(accY); Serial.print(":");
   // Serial.print(accZ); Serial.print(":");
   // Serial.print(roll); Serial.print(" ");
-  Serial.println("kalman pitch");
-  Serial.println(kalAngleY); 
-  Serial.println("sensor pitch");
-  Serial.println(myMPU6500.getPitch());
+  // Serial.println("kalman pitch");
+  // Serial.println(kalAngleY); 
+  // Serial.println("sensor pitch");
+  // Serial.println(myMPU6500.getPitch());
 
   // Serial.print(gyroXangle); Serial.print(":");
   // Serial.print(gyroYangle); Serial.print(":");
