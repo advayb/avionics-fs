@@ -3,11 +3,10 @@
 
 using namespace BLA;
 
-float dt;
+float dt = 4;
 
 // Define Kalman filter parameters
-VectorXd x(9);
-x <<  // State vector (position, velocity, acceleration)
+// State vector (position, velocity, acceleration)
 Matrix<9,9> A = {1, 0, 0, dt, 0, 0, 0.5*dt*dt, 0, 0,
                 0, 1, 0, 0, dt, 0, 0, 0.5*dt*dt, 0,
                 0, 0, 1, 0, 0, dt, 0, 0, 0.5*dt*dt,
@@ -16,7 +15,7 @@ Matrix<9,9> A = {1, 0, 0, dt, 0, 0, 0.5*dt*dt, 0, 0,
                 0, 0, 0, 0, 0, 1, 0, 0, dt,
                 0, 0, 0, 0, 0, 0, 1, 0, 0,
                 0, 0, 0, 0, 0, 0, 0, 1, 0,
-                0, 0, 0, 0, 0, 0, 0, 0, 1} // State transition matrix
+                0, 0, 0, 0, 0, 0, 0, 0, 1}; // State transition matrix
 Matrix<9,9> P = {1,0,0,0,0,0,0,0,0,
                 0,1,0,0,0,0,0,0,0,
                 0,0,1,0,0,0,0,0,0,
@@ -25,7 +24,7 @@ Matrix<9,9> P = {1,0,0,0,0,0,0,0,0,
                 0,0,0,0,0,1,0,0,0,
                 0,0,0,0,0,0,1,0,0,
                 0,0,0,0,0,0,0,1,0,
-                0,0,0,0,0,0,0,0,1}
+                0,0,0,0,0,0,0,0,1};
 Matrix<9,9> Q = {1,0,0,0,0,0,0,0,0,
                   0,1,0,0,0,0,0,0,0,
                   0,0,1,0,0,0,0,0,0,
@@ -34,14 +33,14 @@ Matrix<9,9> Q = {1,0,0,0,0,0,0,0,0,
                   0,0,0,0,0,1,0,0,0,
                   0,0,0,0,0,0,1,0,0,
                   0,0,0,0,0,0,0,1,0,
-                  0,0,0,0,0,0,0,0,1} // Process noise covariance matrix
+                  0,0,0,0,0,0,0,0,1}; // Process noise covariance matrix
 Matrix<3,9> H = {0,0,1,0,0,0,0,0,0,
                 0,0,0,0,0,0,1,0,0,
                 0,0,0,0,0,0,0,1,0,
-                0,0,0,0,0,0,0,0,1}// Measurement matrix
+                0,0,0,0,0,0,0,0,1};// Measurement matrix
 Matrix<3,3> R= {1,0,0,
                0,1,0
-               0,0,1} // Measurement noise covariance matrix
+               0,0,1}; // Measurement noise covariance matrix
 void setup() {
   // Initialize the Kalman filter parameters
   // initKalmanFilter();
