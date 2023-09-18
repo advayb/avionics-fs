@@ -199,8 +199,6 @@ void loop() {
   
   //mpu test
   if(millis() < mpu_t && millis() > servo_t){
-
-  if (mpu.update()) {
       prev_ms = millis();
       if (millis() > prev_ms + 25) {
         angles();
@@ -256,7 +254,6 @@ void loop() {
         prev_ms = millis();
       }
     }
-  }
   delay(5000);
 }
 
