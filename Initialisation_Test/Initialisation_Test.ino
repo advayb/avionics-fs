@@ -1,11 +1,13 @@
-#include <MPU9250.h>
+#include <MPU6500_WE.h>
 #include <quaternionFilters.h>
 #include <Adafruit_BMP280.h>
+#include <Wire.h>
 #include <SPI.h>
 #include <Servo.h>
 #include <SD.h>
 #include <LoRa.h>
 
+#define MPU6500_ADDR 0x68
 #define BMP280_ADDRESS 0x76
 Adafruit_BMP280 bmp;
 
@@ -35,9 +37,10 @@ int readIndex = 0; // Index to keep track of the current reading
 float total = 0; // Running total of readings for averaging
 
 
-MPU9250 mpu;
-int t_rate; //transmission rate of data from serial
-float rollR, pitchR, yawR; //rates of change of roll blah blah in rad/s
+MPU6500_WE myMPU6500 = MPU6500_WE(MPU6500_ADDR);
+xyzFloat AccValue;
+xyzFloat gyr;
+xyzFloat angle;
 
 float accX, accY, accZ; //acceleration in axes
 float angleR, angleP, angleY; //angles of roll pitch blah
@@ -82,18 +85,25 @@ void setup() {
   servo2.attach(servoPin2);
   
 
-  if (!LoRa.begin(915E6)) {
-    Serial.println("Starting LoRa failed!");
-    while (1);
+
+  if(!myMPU6500.init()){
+    Serial.println("MPU6500 does not respond");
+    while(1);
   }
-  
-  mpu.selectFilter(QuatFilterSel::MAHONY);
-  if (!mpu.setup(0x68)) {  // change to your own address
-        while (1) {
-            Serial.println("MPU connection failed");
-            delay(1000);
-        }
-    }
+  else{
+    Serial.println("MPU6500 is connected");
+  }
+  Serial.println("Position you MPU6500 flat and don't move it - calibrating...");
+  delay(1000);
+  myMPU6500.autoOffsets();
+  Serial.println("Done!");
+  myMPU6500.enableGyrDLPF();
+  myMPU6500.setGyrDLPF(MPU6500_DLPF_6);
+  myMPU6500.setSampleRateDivider(5);
+  myMPU6500.setGyrRange(MPU6500_GYRO_RANGE_250);
+  myMPU6500.setAccRange(MPU6500_ACC_RANGE_2G);
+  myMPU6500.enableAccDLPF(true);
+  myMPU6500.setAccDLPF(MPU6500_DLPF_6);
 }
 
 void loop() {
@@ -194,12 +204,10 @@ void loop() {
       prev_ms = millis();
       if (millis() > prev_ms + 25) {
         angles();
-        Serial.print("Roll, pitch, yaw: ");
+        Serial.print("Roll, pitch: ");
         Serial.print(angleR, 4);
         Serial.print(", ");
         Serial.print(angleP, 4);
-        Serial.print(", ");
-        Serial.println(angleY, 4);
         // kalman(k_angleR, kU_angleR, rollR, angleR); //to get smoother and more accurate roll. same below for pitch and yaw
         // k_angleR = kalman1D[0];
         // kU_angleR = kalman1D[1];
@@ -225,13 +233,11 @@ void loop() {
           dataFile.println(data);
           String data = " Pitch - " + String(angleP);
           dataFile.println(data);
-          String data = " Yaw - " + String(angleY);
-          dataFile.println(data);
           dataFile.close();
         }
 
         LoRa.beginPacket();
-        String message = "Roll - " + String(angleR) + " Pitch - " + String(angleP) + " Yaw - " + String(angleY);
+        String message = "Roll - " + String(angleR) + " Pitch - " + String(angleP);
         LoRa.print(message);
         LoRa.endPacket(true);
 
@@ -278,9 +284,8 @@ void testServos(){
 
 void angles(){
 
-  angleR = mpu.getRoll();
-  angleP = mpu.getPitch();
-  angleY = mpu.getYaw();
+  angleR = myMPU6500.getRoll();
+  angleP = myMPU6500.getPitch();
   // rollR = mpu.getGyroX();
   // pitchR = mpu.getGyroY();
   // yawR = mpu.getGyroZ();
