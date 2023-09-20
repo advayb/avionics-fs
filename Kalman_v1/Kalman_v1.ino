@@ -171,11 +171,11 @@ void loop() {
   z(1) = AccValue.x;
   z(2) = AccValue.y;
   z(3) = AccValue.z;
-  Serial.println("ini");
 
   roll = 180*atan(z(2)/sqrt(z(1)*z(1)+z(3)*z(3)))/(3.14159);
   pitch = -180*atan(z(1)/sqrt(z(2)*z(2)+z(3)*z(3)))/(3.14159);
   yaw = yaw + dt*yaw;
+  Serial.println("ini");
 
   Quaternion q = eulerToQuaternion(roll, pitch, yaw);
   z(4) = q.w;
