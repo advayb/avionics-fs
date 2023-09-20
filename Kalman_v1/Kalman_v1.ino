@@ -27,7 +27,7 @@ struct Quaternion {
 
 float w1=0;w2=0;w3=0;
 int checkFlag = 0;
-float dt = 0.03;
+float dt = 0.05;
 
 unsigned long time_now;
 unsigned long time_last;
@@ -35,7 +35,8 @@ unsigned long time_last;
 Matrix<8,1> z;
 Matrix<13,1> x = {0,0,0,0,0,0,0,0,0,1,0,0,0};
   // State vector (position, velocity, acceleration)
-Matrix<13,13> A = {1, 0, 0, dt, 0, 0, 0.5*dt*dt, 0, 0,0,0,0,0,
+Matrix<13,13> A;
+Matrix<13,13> A_id = {1, 0, 0, dt, 0, 0, 0.5*dt*dt, 0, 0,0,0,0,0,
                 0, 1, 0, 0, dt, 0, 0, 0.5*dt*dt, 0, 0,0,0,0,
                 0, 0, 1, 0, 0, dt, 0, 0, 0.5*dt*dt,0,0,0,0,
                 0, 0, 0, 1, 0, 0, dt, 0, 0,0,0,0,0,
@@ -44,10 +45,12 @@ Matrix<13,13> A = {1, 0, 0, dt, 0, 0, 0.5*dt*dt, 0, 0,0,0,0,0,
                 0, 0, 0, 0, 0, 0, 1, 0, 0,0,0,0,0,
                 0, 0, 0, 0, 0, 0, 0, 1, 0,0,0,0,0,
                 0, 0, 0, 0, 0, 0, 0, 0, 1,0,0,0,0,
-                0, 0, 0, 0, 0, 0, 0, 0, 0,1,-0.5*dt*w1,-0.5*dt*w2,-0.5*dt*w3,
-                0, 0, 0, 0, 0, 0, 0, 0, 0,0.5*dt*w1,1,0.5*dt*w3,-0.5*dt*w2,
-                0, 0, 0, 0, 0, 0, 0, 0, 0,0.5*dt*w2,-0.5*dt*w3,1,0.5*dt*w1,
-                0, 0, 0, 0, 0, 0, 0, 0, 0,0.5*dt*w3,0.5*dt*w2,-0.5*dt*w1,1,}; // State transition matrix
+                0, 0, 0, 0, 0, 0, 0, 0, 0,1,0,0,0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0,0,1,0,0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,1,0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,1}; // State transition matrix
+
+
 
 Matrix<9,9> P = {1,0,0,0,0,0,0,0,0,
                 0,1,0,0,0,0,0,0,0,
@@ -78,7 +81,6 @@ Matrix<4,4> R= {4,0,0,0,
                0,0,1,0,
                0,0,0,1}; // Measurement noise covariance matrix
 
-Matrix<13,13> del_A ={};
 
 Matrix<9,4> K;
 
@@ -151,18 +153,24 @@ void loop() {
   // Simulate sensor measurements (replace with actual sensor readings)
   // VectorXd z(3); // Simulated 3D position measurement
   // Fill z with actual measurements here
+  
+  roll = 
+  pitch = 
+  yaw = yaw + dt*w3;
+  Quaternion q = eulerToQuaternion(roll, pitch, yaw);
+
+  gyr = myMPU6500.getGyrValues();
   AccValue = myMPU6500.getGValues();
   
+  w1 = gyr.x;
+  w2 = gyr.y;
+  w3 = gyr.z;
+
   z(1) = AccValue.x;
   z(2) = AccValue.y;
   z(3) = AccValue.z;
   Serial.println("ini");
 
-  roll = 
-  pitch = 
-  yaw = yaw + dt*yaw;
-
-  Quaternion q = eulerToQuaternion(roll, pitch, yaw);
   z(4) = q.w;
   z(5) = q.x;
   z(6) = q.y;
@@ -198,11 +206,28 @@ void initKalmanFilter() {
 }
 void predict() {
   // Predict the next state (x) and covariance (P) here
+  Matrix<13,13> del_A = {0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0,0,-0.5*dt*w1,-0.5*dt*w2,-0.5*dt*w3,
+                0, 0, 0, 0, 0, 0, 0, 0, 0,0.5*dt*w1,0,0.5*dt*w3,-0.5*dt*w2,
+                0, 0, 0, 0, 0, 0, 0, 0, 0,0.5*dt*w2,-0.5*dt*w3,0,0.5*dt*w1,
+                0, 0, 0, 0, 0, 0, 0, 0, 0,0.5*dt*w3,0.5*dt*w2,-0.5*dt*w1,0};
+  
+  A = A_id + del_A;
   x = A * x;
   P = A*P*(~A) + Q;
 }
-void update(const Matrix<4,1> z) {
+
+void update(const Matrix<8,1> z) {
   // Update the state (x) and covariance (P) based on measurement (z) here
+  
   K = P*(~H)*(Inverse(H*P*(~H) + R));
   x = x + K*(z-(H*x));
   P = P - K*H*P;
