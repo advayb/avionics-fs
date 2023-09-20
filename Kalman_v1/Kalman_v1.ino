@@ -7,7 +7,7 @@
 #define BMP280_ADDRESS 0x77
 using namespace BLA;
 
-float dt;
+
 Adafruit_BMP280 bmp;
 const int numReadings = 10; // Number of readings to average
 const float processNoise_bmp = 0.01; // Process noise covariance
@@ -25,14 +25,14 @@ struct Quaternion {
   float w, x, y, z;
 };
 
-float w1=0;w2=0;w3=0;
+float w1=0,w2=0,w3=0;
 int checkFlag = 0;
 float dt = 0.05;
 
 unsigned long time_now;
 unsigned long time_last;
 
-float roll = 0; pitch = 0, yaw = 0;
+float roll = 0, pitch = 0, yaw = 0;
 // Define Kalman filter parameters
 Matrix<8,1> z;
 Matrix<13,1> x = {0,0,0,0,0,0,0,0,0,1,0,0,0};
@@ -108,24 +108,24 @@ void setup() {
   
   Wire.setClock(400000);
   Wire.begin();
-  if(!bmp.begin(BMP280_ADDRESS)){
-    Serial.println("Cannot find BMP280 sensor - check wiring!");
-    while(1);
-  }
-  bmp.setSampling(Adafruit_BMP280::MODE_NORMAL, Adafruit_BMP280::SAMPLING_X2, Adafruit_BMP280::SAMPLING_X16, Adafruit_BMP280::FILTER_X16, Adafruit_BMP280::STANDBY_MS_500);
+  // if(!bmp.begin(BMP280_ADDRESS)){
+  //   Serial.println("Cannot find BMP280 sensor - check wiring!");
+  //   while(1);
+  // }
+  // bmp.setSampling(Adafruit_BMP280::MODE_NORMAL, Adafruit_BMP280::SAMPLING_X2, Adafruit_BMP280::SAMPLING_X16, Adafruit_BMP280::FILTER_X16, Adafruit_BMP280::STANDBY_MS_500);
 
-  for (int i = 0; i < numReadings; i++) {//initialize array
-    total += bmp.readAltitude();
-    readings[i] = bmp.readAltitude();
-  }
+  // for (int i = 0; i < numReadings; i++) {//initialize array
+  //   total += bmp.readAltitude();
+  //   readings[i] = bmp.readAltitude();
+  // }
 
-  if(!myMPU6500.init()){
-    Serial.println("MPU6500 does not respond");
-    while(1);
-  }
-  else{
-    Serial.println("MPU6500 is connected");
-  }
+  // if(!myMPU6500.init()){
+  //   Serial.println("MPU6500 does not respond");
+  //   while(1);
+  // }
+  // else{
+  //   Serial.println("MPU6500 is connected");
+  // }
   Serial.println("Position you MPU6500 flat and don't move it - calibrating...");
   delay(1000);
   myMPU6500.autoOffsets();
@@ -145,7 +145,7 @@ void setup() {
   checkFlag = Serial.parseInt();
   if(checkFlag ==1){
     AccValue = myMPU6500.getGValues();
-    z(0) = bmp.readAltitude();
+    z(0) = 0;
     z(1) = AccValue.x;
     z(2) = AccValue.y;
     z(3) = AccValue.z;
@@ -153,7 +153,7 @@ void setup() {
     z(5) = 0;
     z(6) = 0;
     z(7) = 0;
-    Serial << z;
+    Serial.println(z(3));
   }
   else{
     Serial.println("Incorrect setup");
@@ -173,10 +173,7 @@ void loop() {
   // Fill z with actual measurements here
   
 
-  roll = 180*atan(z(2)/sqrt(z(1)*z(1)+z(3)*z(3)))/(3.14159);
-  pitch = -180*atan(z(1)/sqrt(z(2)*z(2)+z(3)*z(3)))/(3.14159);
-  yaw = yaw + dt*w3;
-  Quaternion q = eulerToQuaternion(roll, pitch, yaw);
+
 
   gyr = myMPU6500.getGyrValues();
   AccValue = myMPU6500.getGValues();
@@ -188,11 +185,12 @@ void loop() {
   z(1) = AccValue.x;
   z(2) = AccValue.y;
   z(3) = AccValue.z;
-
  
-
-
+  roll = 180*atan(z(2)/sqrt(z(1)*z(1)+z(3)*z(3)))/(3.14159);
+  pitch = -180*atan(z(1)/sqrt(z(2)*z(2)+z(3)*z(3)))/(3.14159);
+  yaw = yaw + dt*w3;
   Quaternion q = eulerToQuaternion(roll, pitch, yaw);
+  
   z(4) = q.w;
   z(5) = q.x;
   z(6) = q.y;
@@ -207,7 +205,7 @@ void loop() {
   
   // // Update step
   update(z);
-  Serial << x;
+  Serial.println(x(8));
   Serial.println("aft");
   // Output the estimated state (position, velocity, acceleration)
   // Serial.print("Estimated State (x): ");
