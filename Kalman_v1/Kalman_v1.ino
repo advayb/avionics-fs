@@ -21,24 +21,33 @@ xyzFloat AccValue;
 xyzFloat gyr;
 xyzFloat angle;
 
+struct Quaternion {
+  float w, x, y, z;
+};
+
+float w1=0;w2=0;w3=0;
 int checkFlag = 0;
 float dt = 0.03;
 
 unsigned long time_now;
 unsigned long time_last;
 // Define Kalman filter parameters
-Matrix<4,1> z;
-Matrix<9,1> x = {0,0,0,0,0,0,0,0,0};
+Matrix<8,1> z;
+Matrix<13,1> x = {0,0,0,0,0,0,0,0,0,1,0,0,0};
   // State vector (position, velocity, acceleration)
-Matrix<9,9> A = {1, 0, 0, dt, 0, 0, 0.5*dt*dt, 0, 0,
-                0, 1, 0, 0, dt, 0, 0, 0.5*dt*dt, 0,
-                0, 0, 1, 0, 0, dt, 0, 0, 0.5*dt*dt,
-                0, 0, 0, 1, 0, 0, dt, 0, 0,
-                0, 0, 0, 0, 1, 0, 0, dt, 0,
-                0, 0, 0, 0, 0, 1, 0, 0, dt,
-                0, 0, 0, 0, 0, 0, 1, 0, 0,
-                0, 0, 0, 0, 0, 0, 0, 1, 0,
-                0, 0, 0, 0, 0, 0, 0, 0, 1}; // State transition matrix
+Matrix<13,13> A = {1, 0, 0, dt, 0, 0, 0.5*dt*dt, 0, 0,0,0,0,0,
+                0, 1, 0, 0, dt, 0, 0, 0.5*dt*dt, 0, 0,0,0,0,
+                0, 0, 1, 0, 0, dt, 0, 0, 0.5*dt*dt,0,0,0,0,
+                0, 0, 0, 1, 0, 0, dt, 0, 0,0,0,0,0,
+                0, 0, 0, 0, 1, 0, 0, dt, 0,0,0,0,0,
+                0, 0, 0, 0, 0, 1, 0, 0, dt,0,0,0,0,
+                0, 0, 0, 0, 0, 0, 1, 0, 0,0,0,0,0,
+                0, 0, 0, 0, 0, 0, 0, 1, 0,0,0,0,0,
+                0, 0, 0, 0, 0, 0, 0, 0, 1,0,0,0,0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0,1,-0.5*dt*w1,-0.5*dt*w2,-0.5*dt*w3,
+                0, 0, 0, 0, 0, 0, 0, 0, 0,0.5*dt*w1,1,0.5*dt*w3,-0.5*dt*w2,
+                0, 0, 0, 0, 0, 0, 0, 0, 0,0.5*dt*w2,-0.5*dt*w3,1,0.5*dt*w1,
+                0, 0, 0, 0, 0, 0, 0, 0, 0,0.5*dt*w3,0.5*dt*w2,-0.5*dt*w1,1,}; // State transition matrix
 
 Matrix<9,9> P = {1,0,0,0,0,0,0,0,0,
                 0,1,0,0,0,0,0,0,0,
@@ -68,6 +77,8 @@ Matrix<4,4> R= {4,0,0,0,
                0,1,0,0,
                0,0,1,0,
                0,0,0,1}; // Measurement noise covariance matrix
+
+Matrix<13,13> del_A ={};
 
 Matrix<9,4> K;
 
@@ -118,11 +129,16 @@ void setup() {
     z(1) = AccValue.x;
     z(2) = AccValue.y;
     z(3) = AccValue.z;
+    z(4) = 1;
+    z(5) = 0;
+    z(6) = 0;
+    z(7) = 0;
     Serial << z;
   }
   else{
     Serial.println("Incorrect setup");
   }
+
 
 
   initKalmanFilter();
@@ -141,8 +157,21 @@ void loop() {
   z(2) = AccValue.y;
   z(3) = AccValue.z;
   Serial.println("ini");
+
+  roll = 
+  pitch = 
+  yaw = yaw + dt*yaw;
+
+  Quaternion q = eulerToQuaternion(roll, pitch, yaw);
+  z(4) = q.w;
+  z(5) = q.x;
+  z(6) = q.y;
+  z(7) = q.z;
+
+
   Serial << z;
 
+  
   // // Prediction step
   predict();
   
@@ -177,6 +206,31 @@ void update(const Matrix<4,1> z) {
   K = P*(~H)*(Inverse(H*P*(~H) + R));
   x = x + K*(z-(H*x));
   P = P - K*H*P;
+}
+
+Quaternion eulerToQuaternion(float roll, float pitch, float yaw) {
+  Quaternion q;
+  
+  // Convert degrees to radians
+  roll = radians(roll);
+  pitch = radians(pitch);
+  yaw = radians(yaw);
+
+  // Calculate half angles
+  float cosRoll = cos(roll / 2);
+  float sinRoll = sin(roll / 2);
+  float cosPitch = cos(pitch / 2);
+  float sinPitch = sin(pitch / 2);
+  float cosYaw = cos(yaw / 2);
+  float sinYaw = sin(yaw / 2);
+
+  // Calculate quaternion components
+  q.w = cosRoll * cosPitch * cosYaw + sinRoll * sinPitch * sinYaw;
+  q.x = sinRoll * cosPitch * cosYaw - cosRoll * sinPitch * sinYaw;
+  q.y = cosRoll * sinPitch * cosYaw + sinRoll * cosPitch * sinYaw;
+  q.z = cosRoll * cosPitch * sinYaw - sinRoll * sinPitch * cosYaw;
+
+  return q;
 }
 // int main() {
 //   setup();
