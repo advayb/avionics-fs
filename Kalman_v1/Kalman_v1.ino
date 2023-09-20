@@ -1,22 +1,13 @@
 #include <BasicLinearAlgebra.h>
 #include <ElementStorage.h>
-
-using namespace BLA;
-
-float dt;
-
-// Define Kalman filter parameters
-VectorXd x(9);
-x <<  // State vector (position, velocity, acceleration)
 #include <Adafruit_BMP280.h>
-
 #include <MPU6500_WE.h>
 #include <Wire.h>
 #define MPU6500_ADDR 0x68
 #define BMP280_ADDRESS 0x77
-
 using namespace BLA;
 
+float dt;
 Adafruit_BMP280 bmp;
 const int numReadings = 10; // Number of readings to average
 const float processNoise_bmp = 0.01; // Process noise covariance
