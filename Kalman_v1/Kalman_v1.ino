@@ -31,6 +31,8 @@ float dt = 0.03;
 
 unsigned long time_now;
 unsigned long time_last;
+
+float roll = 0; pitch = 0;
 // Define Kalman filter parameters
 Matrix<8,1> z;
 Matrix<13,1> x = {0,0,0,0,0,0,0,0,0,1,0,0,0};
@@ -158,8 +160,8 @@ void loop() {
   z(3) = AccValue.z;
   Serial.println("ini");
 
-  roll = 
-  pitch = 
+  roll = 180*atan(z(2)/sqrt(z(1)*z(1)+z(3)*z(3)))/(3.14159);
+  pitch = -180*atan(z(1)/sqrt(z(2)*z(2)+z(3)*z(3)))/(3.14159);
   yaw = yaw + dt*yaw;
 
   Quaternion q = eulerToQuaternion(roll, pitch, yaw);
