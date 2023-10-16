@@ -94,7 +94,7 @@ Matrix<8,8> R= {4,0,0,0,0,0,0,0,
                0,0,0,0,5,0,0,0,
                0,0,0,0,0,5,0,0,
                0,0,0,0,0,0,5,0,
-               5,0,0,0,0,0,0,5}; // Measurement noise covariance matrix
+               0,0,0,0,0,0,0,5}; // Measurement noise covariance matrix
 
 Matrix<13,8> K;
 
@@ -155,7 +155,7 @@ void setup() {
 
     roll = 180*atan(AccValue.y/sqrt(AccValue.x*AccValue.x + AccValue.z*AccValue.z))/(3.14159);
     pitch = -180*atan(AccValue.x/sqrt(AccValue.y*AccValue.y+AccValue.z*AccValue.z))/(3.14159);
-//initial orientation measurement
+  //initial orientation measurement
 
 
 
@@ -208,7 +208,6 @@ void loop() {
   Serial.println("ini");
   Serial << z;
 
-
   // // Prediction step
   predict();
   
@@ -253,7 +252,7 @@ void predict() {
   x = A * x;
   P = A*P*(~A) + Q;
 }
-void update(const Matrix<8,1> z) {
+void update(Matrix<8,1> z) {
   // Update the state (x) and covariance (P) based on measurement (z) here
   K = P*(~H)*(Inverse(H*P*(~H) + R));
   x = x + K*(z-(H*x));
@@ -284,10 +283,3 @@ Quaternion eulerToQuaternion(float roll, float pitch, float yaw) {
 
   return q;
 }
-// int main() {
-//   setup();
-//   while (true) {
-//     loop();
-//   }
-//   return 0;
-// }
