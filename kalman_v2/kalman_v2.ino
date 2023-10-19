@@ -36,13 +36,9 @@ Matrix<8,1> z;
 Matrix<13,1> x;
   // State vector (position, velocity, acceleration)
 Matrix<13,13> A;
-Matrix<13,13> A_id;
-                 // State transition matrix
+Matrix<13,13> A_id;                 // State transition matrix
 Matrix<13,13> P;
- 
-Matrix<13,13> Q;
-                  
-                   // Process noise covariance matrix
+Matrix<13,13> Q;                     // Process noise covariance matrix
 Matrix<8,13> H;// Measurement matrix
 Matrix<8,8> R; // Measurement noise covariance matrix
  
