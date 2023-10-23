@@ -1,7 +1,7 @@
 #include <BasicLinearAlgebra.h>
 #include <ElementStorage.h>
 #include <Adafruit_BMP280.h>
- 
+#include <math.h>
 #include <MPU6500_WE.h>
 #include <Wire.h>
 #define MPU6500_ADDR 0x68
@@ -301,4 +301,35 @@ Quaternion eulerToQuaternion(float roll, float pitch, float yaw) {
   q.z = cosRoll * cosPitch * sinYaw - sinRoll * sinPitch * cosYaw;
  
   return q;
+}
+
+float constrainTo180(float angle) {
+    angle = fmod(angle + 180, 360);
+    if (angle < 0)
+        angle += 360;
+    return angle - 180;
+}
+
+float getYaw(const Quaternion &q) {
+    float siny_cosp = 2 * (q.w * q.z + q.x * q.y);
+    float cosy_cosp = 1 - 2 * (q.y * q.y + q.z * q.z);
+    float yaw = atan2(siny_cosp, cosy_cosp);
+    return constrainTo180(yaw * 180.0 / M_PI);
+}
+
+float getPitch(const Quaternion &q) {
+    float sinp = 2 * (q.w * q.y - q.z * q.x);
+    float pitch;
+    if (fabs(sinp) >= 1)
+        pitch = copysign(M_PI / 2, sinp); // use 90 degrees if out of range
+    else
+        pitch = asin(sinp);
+    return constrainTo180(pitch * 180.0 / M_PI);
+}
+
+float getRoll(const Quaternion &q) {
+    float sinr_cosp = 2 * (q.w * q.x + q.y * q.z);
+    float cosr_cosp = 1 - 2 * (q.x * q.x + q.y * q.y);
+    float roll = atan2(sinr_cosp, cosr_cosp);
+    return constrainTo180(roll * 180.0 / M_PI);
 }
