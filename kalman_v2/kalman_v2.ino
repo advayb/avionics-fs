@@ -45,8 +45,9 @@ Matrix<8,8> R; // Measurement noise covariance matrix
 Matrix<13,8> K;
  
 struct Quaternion {
-  float w, x, y, z;
-  Quaternion(float _w, float _x, float _y, float _z) : w(_w), x(_x), y(_y), z(_z) {}
+    float w, x, y, z;
+
+    Quaternion(float _w, float _x, float _y, float _z) : w(_w), x(_x), y(_y), z(_z) {}
 };
  
 void setup() {
