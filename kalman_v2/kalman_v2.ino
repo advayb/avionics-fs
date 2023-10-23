@@ -46,6 +46,7 @@ Matrix<13,8> K;
  
 struct Quaternion {
   float w, x, y, z;
+  Quaternion(float _w, float _x, float _y, float _z) : w(_w), x(_x), y(_y), z(_z) {}
 };
  
 void setup() {
@@ -277,7 +278,7 @@ void update(Matrix<8,1> z) {
   x = x + K*(z-(H*x));
   P = P - K*H*P;
 }
- 
+
 Quaternion eulerToQuaternion(float roll, float pitch, float yaw) {
   Quaternion q;
   
