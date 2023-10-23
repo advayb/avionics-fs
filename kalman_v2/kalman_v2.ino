@@ -47,7 +47,7 @@ Matrix<13,8> K;
 struct Quaternion {
     float w, x, y, z;
 
-    Quaternion(float _w, float _x, float _y, float _z) : w(_w), x(_x), y(_y), z(_z) {}
+    // Quaternion(float _w, float _x, float _y, float _z) : w(_w), x(_x), y(_y), z(_z) {}
 };
  
 void setup() {
@@ -86,7 +86,7 @@ void setup() {
   myMPU6500.enableAccDLPF(true);
   myMPU6500.setAccDLPF(MPU6500_DLPF_6);
  
-  initKalmanFilter());
+  initKalmanFilter();
   Serial.println("Please enter 1 when ready");
   while (!Serial.available()) {
           ; // Wait for user input
@@ -154,7 +154,7 @@ void loop() {
   pitch = -180*atan(z(1)/sqrt(z(2)*z(2)+z(3)*z(3)))/(3.14159);
   yaw = yaw + w3*dt;
  
-  q = eulerToQuaternion(roll, pitch, yaw);
+  Quaternion q = eulerToQuaternion(roll, pitch, yaw);
  
   z(3) = z(3) - 9.81;
   z(4) = q.w;
@@ -334,4 +334,12 @@ float getRoll(const Quaternion &q) {
     float cosr_cosp = 1 - 2 * (q.x * q.x + q.y * q.y);
     float roll = atan2(sinr_cosp, cosr_cosp);
     return constrainTo180(roll * 180.0 / M_PI);
+}
+
+void normalizeQuaternion(Quaternion &q) {
+    float norm = sqrt(q.w * q.w + q.x * q.x + q.y * q.y + q.z * q.z);
+    q.w /= norm;
+    q.x /= norm;
+    q.y /= norm;
+    q.z /= norm;
 }
