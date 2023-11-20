@@ -139,7 +139,7 @@ void setup() {
  
  
  
-    Serial << z;
+    // Serial << z;
   }
   else{
     Serial.println("Incorrect setup");
@@ -186,6 +186,8 @@ void loop() {
   pitch = -180*atan(z(1)/sqrt(z(2)*z(2)+z(3)*z(3)))/(3.14159);
   yaw = yaw + w3*dt;
  
+
+
  Quaternion q = eulerToQuaternion(roll, pitch, yaw);
  normalizeQuaternion(q);
  
@@ -194,8 +196,9 @@ void loop() {
   z(5) = q.x;
   z(6) = q.y;
   z(7) = q.z;
- 
-  Serial.println("ini");
+  
+
+  // Serial.println("ini");
   // Serial << z;
  
   // // Prediction step
@@ -203,8 +206,10 @@ void loop() {
   
   // // Update step
   update(z);
-  Serial << x;
-  Serial.println("aft");
+
+
+  // Serial << x;
+  // Serial.println("aft");
   // Output the estimated state (position, velocity, acceleration)
   // Serial.print("Estimated State (x): ");
   // for (int i = 0; i < x.size(); i++) {
@@ -220,8 +225,12 @@ void loop() {
   myQuaternion.y = x(11);
   myQuaternion.z = x(12);
 
-  double angle_x = getRoll(myQuaternion); // Replace with actual sensor reading
+  double angle_x = getRoll(myQuaternion);
+  double angle_y = getYaw(myQuaternion); // Replace with actual sensor reading
   double angle_z = getPitch(myQuaternion); // Replace with actual sensor reading
+
+  Serial.printf("Zero:%d,Zero:%d,Zero:%d,Roll_m:%.2f,Pitch_m:%.2f,Yaw_m:%.2f,Roll_k:%.2f,Pitch_k:%.2f,Yaw_k:%.2f\n",0,0,0,roll,pitch,yaw,angle_x,angle_z,angle_y);
+
 
   input_x = angle_x;
   input_z = angle_z;
@@ -232,8 +241,8 @@ void loop() {
   adjustServoX(angle_x);
   adjustServoZ(angle_z);
   
-  Serial.print(output_x);
-  Serial.println(output_z);
+  // Serial.print(output_x);
+  // Serial.println(output_z);
 
 
   delay(10);
@@ -272,10 +281,10 @@ void initKalmanFilter() {
                 0,0,0,0,0,0,1,0,0,0,0,0,0,
                 0,0,0,0,0,0,0,1,0,0,0,0,0,
                 0,0,0,0,0,0,0,0,1,0,0,0,0,
-                0,0,0,0,0,0,0,0,0,1,0,0,0,
-                0,0,0,0,0,0,0,0,0,0,1,0,0,
-                0,0,0,0,0,0,0,0,0,0,0,1,0,
-                0,0,0,0,0,0,0,0,0,0,0,0,1};
+                0,0,0,0,0,0,0,0,0,0.05,0,0,0,
+                0,0,0,0,0,0,0,0,0,0,0.05,0,0,
+                0,0,0,0,0,0,0,0,0,0,0,0.05,0,
+                0,0,0,0,0,0,0,0,0,0,0,0,0.05};
  
   Q = {1,0,0,0,0,0,0,0,0,0,0,0,0,
                   0,1,0,0,0,0,0,0,0,0,0,0,0,
@@ -286,10 +295,10 @@ void initKalmanFilter() {
                   0,0,0,0,0,0,1,0,0,0,0,0,0,
                   0,0,0,0,0,0,0,1,0,0,0,0,0,
                   0,0,0,0,0,0,0,0,1,0,0,0,0,
-                  0,0,0,0,0,0,0,0,0,0.001,0,0,0,
-                  0,0,0,0,0,0,0,0,0,0,0.001,0,0,
-                  0,0,0,0,0,0,0,0,0,0,0,0.001,0,
-                  0,0,0,0,0,0,0,0,0,0,0,0,0.001,};
+                  0,0,0,0,0,0,0,0,0,0.1,0,0,0,
+                  0,0,0,0,0,0,0,0,0,0,0.1,0,0,
+                  0,0,0,0,0,0,0,0,0,0,0,0.1,0,
+                  0,0,0,0,0,0,0,0,0,0,0,0,0.1};
                   
                    // Process noise covariance matrix
   H = {0,0,1,0,0,0,0,0,0,0,0,0,0,
@@ -299,15 +308,15 @@ void initKalmanFilter() {
                 0,0,0,0,0,0,0,0,0,1,0,0,0,
                 0,0,0,0,0,0,0,0,0,0,1,0,0,
                 0,0,0,0,0,0,0,0,0,0,0,1,0,
-                0,0,0,0,0,0,0,0,0,0,0,0,1,};// Measurement matrix
+                0,0,0,0,0,0,0,0,0,0,0,0,1};// Measurement matrix
   R= {4,0,0,0,0,0,0,0,
                0,1,0,0,0,0,0,0,
                0,0,1,0,0,0,0,0,
                0,0,0,1,0,0,0,0,
-               0,0,0,0,5,0,0,0,
-               0,0,0,0,0,5,0,0,
-               0,0,0,0,0,0,5,0,
-               0,0,0,0,0,0,0,5}; // Measurement noise covariance matrix
+               0,0,0,0,0.05,0,0,0,
+               0,0,0,0,0,0.05,0,0,
+               0,0,0,0,0,0,0.05,0,
+               0,0,0,0,0,0,0,0.05}; // Measurement noise covariance matrix
  
 }
  
