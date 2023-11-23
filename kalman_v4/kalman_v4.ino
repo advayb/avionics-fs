@@ -58,15 +58,15 @@ struct Quaternion {
  
 
 //Define PID gains  
-double kp = 3;
-double ki = 3;
-double kd = 5;
+// double kp = 3;
+// double ki = 3;
+// double kd = 5;
 
-double setpoint = 0.0;
-double input_x = 0.0;
-double input_z = 0.0;
-double output_x = 0.0;
-double output_z = 0.0;
+// double setpoint = 0.0;
+// double input_x = 0.0;
+// double input_z = 0.0;
+// double output_x = 0.0;
+// double output_z = 0.0;
 
 Quaternion q;
 //------------------------------------
@@ -76,14 +76,14 @@ Quaternion q;
 #define Nstate 13 // position, speed, acceleration
 #define Nobs 8   // position, acceleration
 
-// measurement std of the noise
-#define n_p 0.3 // position measurement noise
-#define n_a 5.0 // acceleration measurement noise
+// // measurement std of the noise
+// #define n_p 0.3 // position measurement noise
+// #define n_a 5.0 // acceleration measurement noise
 
-// model std (1/inertia)
-#define m_p 0.1
-#define m_s 0.1
-#define m_a 0.8
+// // model std (1/inertia)
+// #define m_p 0.1
+// #define m_s 0.1
+// #define m_a 0.8
 
 BLA::Matrix<Nobs> obs; // observation vector
 KALMAN<Nstate,Nobs> K; // your Kalman filter
